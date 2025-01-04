@@ -1,0 +1,108 @@
+BACKEND CODE:
+from flask import Flask, jsonify, render_template, request
+import requests
+app = Flask(_name_)
+
+API_KEY = 'your_news_api_key'
+
+@app.route('/api/news', methods=['GET'])
+def fetch_news():
+    try:
+        url = f'https://newsapi.org/v2/top-headlines?country=us&apiKey={API_KEY}'
+        response = requests.get(url)
+        response.raise_for_status()https://github.com/Greeshma-h/ADVANCED-ANIMATIONS_1/tree/main
+        articles = response.json().get('articles', [])
+        return jsonify(articles)
+    except requests.RequestException as e:
+        return jsonify({"error": str(e)}), 500
+@app.route('/')
+def home():
+    return render_template('news.html')
+
+if _name_ == '_main_':
+    app.run(debug=True)
+
+
+
+FRONTEND CODE:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .news-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .news-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            width: 300px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .news-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .news-card h3 {
+            margin: 10px 0 5px 0;
+            font-size: 18px;
+        }
+        .news-card p {
+            font-size: 14px;
+            color: #555;
+        }
+        .news-card a {
+            text-decoration: none;
+            color: #007BFF;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Latest News</h1>
+    <div class="news-container" id="news-container"></div>
+
+    <script>
+        async function fetchNews() {
+            try {
+                const response = await fetch('/api/news');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch news');
+                }
+                const articles = await response.json();
+                const container = document.getElementById('news-container');
+                
+                // Display each news article
+                articles.forEach(article => {
+                    const newsCard = document.createElement('div');
+                    newsCard.className = 'news-card';
+                    newsCard.innerHTML = `
+                        <img src="${article.urlToImage || ''}" alt="News Image">
+                        <h3>${article.title}</h3>
+                        <p>${article.description || 'No description available'}</p>
+                        <a href="${article.url}" target="_blank">Read more</a>
+                    `;
+                    container.appendChild(newsCard);
+                });
+            } catch (error) {
+                console.error(error);
+                const container = document.getElementById('news-container');
+                container.innerHTML = '<p>Error fetching news</p>';
+            }
+        }
+
+        // Fetch news when the page loads
+        fetchNews();
+    </script>
+</body>
+</html>
